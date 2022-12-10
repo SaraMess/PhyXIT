@@ -12,7 +12,7 @@ import requests
 import threading
 import time
 
-FREQ_MINUTES = 0.5
+FREQ_MINUTES = 10
 
 class VisualCrossingHandler(threading.Thread):
     """"""
@@ -58,10 +58,11 @@ class VisualCrossingHandler(threading.Thread):
         keys_list = ["temp", "feelslike", "humidity", "precip", "precipprob", "precip", "windgust", "windspeed", "winddir", "pressure", "visibility", "cloudcover", "uvindex", "conditions", "stations"]
         logging.info(f"Performing a current weather request for {locationName}")
         request = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{locationName}/today?unitGroup=metric&include=current&key=S49E5MA43T843ZK2N6A4ZTT87&contentType=json&lang=id"
-        response = self._performRequest(request)["currentConditions"]
+        response = self._performRequest(request)
         #If no response was received, return empty dict:
         if response == {}:
             return current_weather_dict
+        response = response["currentConditions"]
         #Build current weather dict with needed data:
         for key in keys_list:
             try :
@@ -71,6 +72,22 @@ class VisualCrossingHandler(threading.Thread):
                 current_weather_dict[key] = ""
         return current_weather_dict
 
+
+    def add_city(self, location_name : str) -> int:
+        """"""
+
+        #Test if it is possible to add more city or not:
+        if len(self.citiesData) == 6:
+            logging.error("Limit for number of cities has been reached")
+            return -1
+        #Test if the specified location exists on VisualCrossing by performing a request
+        #for this location
+        if self.currentWeatherRequest(location_name) == {}:
+            logging.error(f"An error occured while performing a request for {location_name}. \
+            It seems that this city is not known by Visual Crossing API")
+            return -2
+        self.citiesData[location_name] = []
+        return 0
 
     def run(self):
         #Run forever
