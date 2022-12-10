@@ -9,6 +9,7 @@ import numpy as np
 import time
 from PIL import Image
 import logging
+from VisualCrossingHandler import VisualCrossingHandler
 
 
 #=======================
@@ -17,8 +18,10 @@ import logging
 
 #Declare a bot instance :
 phyxit = commands.Bot(command_prefix='+', intents=discord.Intents.all())
+vc_handler = VisualCrossingHandler()
 #Declare a logger for debugging purposes:
 logging.basicConfig(level=logging.INFO)
+
 
 
 
@@ -29,6 +32,7 @@ logging.basicConfig(level=logging.INFO)
 
 @phyxit.event
 async def on_ready():
+    vc_handler.start()
     logging.info("Bot is ready to use!")
 
 
