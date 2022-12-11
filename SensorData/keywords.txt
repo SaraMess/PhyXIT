@@ -6,24 +6,17 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-Cartesia   KEYWORD1
-Mov3d	KEYWORD1
-Sample KEYWORD1
+SensorData   KEYWORD1
+Fifo KEYWORD1
 
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-kalmanFilter	KEYWORD2
-avgFilter	KEYWORD2
-madgwickInit	KEYWORD2
-madgwickUpdate	KEYWORD2
-recovData	KEYWORD2
-send	KEYWORD2
-readIMU KEYWORD2
-getData KEYWORD2
-empty KEYWORD2
+SensorData	KEYWORD2
+dataSend	KEYWORD2
+dataSave	KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################
