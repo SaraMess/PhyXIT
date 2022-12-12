@@ -55,9 +55,21 @@
             }
             else
             {
+                if(index_read == index_write)
+                {
+                    if(this->isEmpty())
+                    {
+                        index_read = (index_read + 1) % max_size;
+                    }
+                }
                 index_write = (index_write + 1) % max_size;
                 if(index_read == index_write)
-                    index_read = (index_read + 1) % max_size;
+                {
+                    if(!this->isEmpty())
+                    {
+                        index_read = (index_read + 1) % max_size;
+                    }
+                }
                 data[index_write] = another;
                 c_size = c_size + 1; 
                 if (c_size>max_size) 
@@ -81,9 +93,15 @@
                 index_read = 0;
             if(!this->isEmpty())
             {
-                index_read = (index_read + 1) % max_size;
                 c_size--;
+                if(c_size>0)
+                {
+                    index_read = (index_read + 1) % max_size;
+                }
+                else
+                    index_read = index_write;
             }
+
         }
 
         /** return the oldest value inserted in the FIFO,
@@ -118,7 +136,7 @@
 
         void reset(void)
         {
-            index_read = index_write = 0;
+            index_read = index_write = -1;
             c_size = 0;
         }
 

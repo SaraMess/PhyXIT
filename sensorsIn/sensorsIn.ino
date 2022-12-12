@@ -33,7 +33,7 @@ void setup() {
   
   float data[] ={1.1,2.2,3.3};
   test.dataSave(data,sizeof(data)/sizeof(data[0]));
-  pass = 0;
+  pass = -1;
 
 
 }
@@ -62,10 +62,10 @@ void loop() {
   Serial.println(tempC);
 
   // wait a 2 seconds between readings
-  String here[] = {"hum","temp","range"};
+  String here[] = {"temp","humi","rang"};
   float dataa[] = {tempC,humi,rang};
   test.dataSave(dataa, 3);
-  if(pass == 3)
+  if(pass == 2)
     {
       test.data2Json(here);
       pass=-1;
