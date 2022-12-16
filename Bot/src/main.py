@@ -1,4 +1,14 @@
-#Importation des différents modules
+#**************************************************#
+#                 main.pyFile                      #
+#**************************************************#
+#   Authors : Sara MESSARA - Clément PAGES         #
+#**************************************************#
+
+
+#========================================#
+#       Modules used in this file        #
+#========================================#
+
 import os
 import discord
 from discord.ext import commands
@@ -14,9 +24,10 @@ import logging
 from BotController import BotController
 
 
-#=======================
-#    GLOBAL VARIABLES
-#=======================
+
+#===================================#
+#   Global Variables Declarations   # 
+#===================================#
 
 #Declare a bot instance :
 phyxit = commands.Bot(command_prefix='+', intents=discord.Intents.all())
@@ -26,11 +37,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 
-
-#==================================
-#        BOT EVENTS
-#==================================
-
+#==============================#
+#   Bot Events Declarations    #
+#==============================#
 
 @phyxit.event
 async def on_ready():
