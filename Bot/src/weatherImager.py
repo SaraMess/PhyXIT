@@ -44,7 +44,7 @@ ITEM_HEIGHT = ICON_SIZE[1] + INTER_ALIGNMENT
 
 
 
-def _generate_weather_image(self, weather_condition_code : str) -> Image:
+def _generate_weather_image(weather_condition_code : str) -> Image:
     """Generate a basic image with adapted background and weather icon according 
     to the specified weather condition code
     ## Parameter:
@@ -64,7 +64,7 @@ def _generate_weather_image(self, weather_condition_code : str) -> Image:
     return weather_image
 
 
-def _add_precip_data(self, request_response : dict, weather_image : Image) -> Image :
+def _add_precip_data(request_response : dict, weather_image : Image) -> Image :
     """Add precipitation information contained in JSON request response to the
     specified `weather_image`
     ## Parameters:
@@ -90,7 +90,7 @@ def _add_precip_data(self, request_response : dict, weather_image : Image) -> Im
     return weather_image
 
 
-def _add_wind_data(self, request_response : dict, weather_image : Image) -> Image:
+def _add_wind_data(request_response : dict, weather_image : Image) -> Image:
     """ Add wind information (speed, gust and direction) contained in JSON `request_response`
     to the specified `weather_image`
     ## Parameters:
@@ -112,7 +112,7 @@ def _add_wind_data(self, request_response : dict, weather_image : Image) -> Imag
     return weather_image
 
 
-def _add_humidity_data(self, request_response : dict, weather_image : Image) -> None:
+def _add_humidity_data(request_response : dict, weather_image : Image) -> None:
     """ Add humidity information contained in JSON `request_response`
     to the specified `weather_image`
     ## Parameters:
@@ -125,7 +125,7 @@ def _add_humidity_data(self, request_response : dict, weather_image : Image) -> 
     weather_image.drawText(f"{request_response['humidity']}%", MEDIUM_FONT, (TXT_VERTICAL_ALIGNMENT, 5 * ITEM_HEIGHT + ITEMS_UP_ALIGNMENT))
 
 
-def create_current_weather_image(self, current_weather : dict, path : str) -> None:
+def create_current_weather_image(current_weather : dict, path : str) -> None:
     """Create an image for the API response specified in argument
     ## Parameters :
     * `currentWeather` : response return by the weather API, as a dictionnary
@@ -134,14 +134,14 @@ def create_current_weather_image(self, current_weather : dict, path : str) -> No
     An image that represents response from weather API"""
 
     #Create a basic image according to current weather conditions:
-    current_weather_image = self._generate_weather_image(current_weather['conditions'])
+    current_weather_image = _generate_weather_image(current_weather['conditions'])
     #Add temperature data to the image:
     current_weather_image.drawText(f"{round(current_weather['temp'], 1)}°C", BIG_FONT, (LEFT_ALIGNMENT, UP_ALIGNMENT))
     current_weather_image.drawText(f"ressenti {round(current_weather['feelslike'], 1)}°C", MEDIUM_FONT, (LEFT_ALIGNMENT, MIN_MAX_TEMP_ALIGNMENT))
     #Add precipitation data to the image :
-    self._add_precip_data(current_weather, current_weather_image)
+    _add_precip_data(current_weather, current_weather_image)
     #Add wind data to the image:
-    self._add_wind_data(current_weather, current_weather_image)
+    _add_wind_data(current_weather, current_weather_image)
     #Add atmospheric data to the image:
     current_weather_image.addIcon(f"{ICON_DIR_PATH}pressure.png", ICON_SIZE, (LEFT_ALIGNMENT, 3 * ITEM_HEIGHT + ITEMS_UP_ALIGNMENT))
     current_weather_image.drawText(f"{current_weather['pressure']}hPa", MEDIUM_FONT, (TXT_VERTICAL_ALIGNMENT, 3 * ITEM_HEIGHT + ITEMS_UP_ALIGNMENT))
@@ -152,6 +152,6 @@ def create_current_weather_image(self, current_weather : dict, path : str) -> No
     current_weather_image.addIcon(f"{ICON_DIR_PATH}cloudcover.png", ICON_SIZE, (CENTRE_ALIGNMENT, 4 * ITEM_HEIGHT + ITEMS_UP_ALIGNMENT))
     current_weather_image.drawText(f"{current_weather['cloudcover']}%", MEDIUM_FONT, (TXT_CENTRAL_VERTICAL_ALIGNMENT, 4 * ITEM_HEIGHT + ITEMS_UP_ALIGNMENT))
     #Add humidity data to the image:
-    self._add_humidity_data(current_weather, current_weather_image)
+    _add_humidity_data(current_weather, current_weather_image)
 
     current_weather_image.saveImage(path)
