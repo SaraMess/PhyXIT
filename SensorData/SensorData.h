@@ -101,6 +101,8 @@
                 else
                     index_read = index_write;
             }
+            Serial.println(c_size);
+            Serial.println(data[index_read]);
 
         }
 
@@ -158,11 +160,13 @@ class SensorData{
     int fSize;
     Fifo<float>** data; // all the sensors
     int* types;
-    StaticJsonDocument<10000> dataJson; // check if viable
+    DynamicJsonDocument dataJson; // check if viable
     JsonObject levels; // sensors group
+    JsonArray* levels2;
     
     public:
     SensorData(int, int, int*);
+    SensorData(SensorData &);
     SensorData(int, int, int*, String, String);
     SensorData(int sSize, int fSize);
     SensorData(int, int, String, String);
@@ -173,7 +177,9 @@ class SensorData{
     void dataSend(void);
     int dataSave(float*, int);
     int dataSave(float*, int, int*);
-    int data2Json(String*);
+    //int data2Json(String*);
+    DynamicJsonDocument data2Json(String*);
+    int data2Json(String*, char* output);
 };
 
 

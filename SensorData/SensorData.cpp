@@ -1,7 +1,7 @@
 #include"SensorData.h"
 
 
-SensorData::SensorData(int sSize, int fSize):sSize(sSize), fSize(fSize) {
+SensorData::SensorData(int sSize, int fSize):sSize(sSize), fSize(fSize), dataJson(10000) {
     data = new Fifo<float>*[sSize];
     types = new int[sSize];
     for(int i=0;i<sSize; i++)
@@ -13,9 +13,24 @@ SensorData::SensorData(int sSize, int fSize):sSize(sSize), fSize(fSize) {
     dataJson["Server"] = "ESP32";
     dataJson["Localisation"] = "Home";
     levels = dataJson.createNestedObject("Sensors");
-
     } 
-SensorData::SensorData(int sSize, int fSize, String server, String localisation):sSize(sSize), fSize(fSize) {
+SensorData::SensorData(SensorData &other):dataJson(1000) {
+    sSize = other.sSize;
+    fSize = other.fSize;
+    data = new Fifo<float>*[sSize];
+    types = new int[sSize];
+    for(int i=0;i<sSize; i++)
+    {
+        data[i] = new Fifo<float>(fSize);
+        types[i] = 0;
+    }
+    dataJson = dataJson.to<JsonObject>();
+    dataJson["Server"] = "ESP32";
+    dataJson["Localisation"] = "Home";
+    levels = dataJson.createNestedObject("Sensors");
+    } 
+
+SensorData::SensorData(int sSize, int fSize, String server, String localisation):sSize(sSize), fSize(fSize),dataJson(10000) {
     data = new Fifo<float>*[sSize];
     types = new int[sSize];
     for(int i=0;i<sSize; i++)
@@ -29,7 +44,7 @@ SensorData::SensorData(int sSize, int fSize, String server, String localisation)
     levels = dataJson.createNestedObject("Sensors");
     } 
 
-SensorData::SensorData(int sSize, int fSize, int* typ):sSize(sSize), fSize(fSize) {
+SensorData::SensorData(int sSize, int fSize, int* typ):sSize(sSize), fSize(fSize),dataJson(10000) {
     data = new Fifo<float>*[sSize];
     types = new int[sSize];
     for(int i=0;i<sSize; i++)
@@ -38,7 +53,7 @@ SensorData::SensorData(int sSize, int fSize, int* typ):sSize(sSize), fSize(fSize
         types[i] = typ[i];
     }
     } 
-SensorData::SensorData(int sSize, int fSize, int* typ, String server, String localisation):sSize(sSize), fSize(fSize) {
+SensorData::SensorData(int sSize, int fSize, int* typ, String server, String localisation):sSize(sSize), fSize(fSize),dataJson(10000) {
     data = new Fifo<float>*[sSize];
     types = new int[sSize];
     for(int i=0;i<sSize; i++)
@@ -76,6 +91,7 @@ SensorData::SensorData(int sSize, int fSize, int* typ, String server, String loc
         delete data[i];
     }
     delete[] data;
+    delete[] types;
   }
   
   int SensorData::dataSave(float* D, int sizeD)
@@ -136,7 +152,7 @@ SensorData::SensorData(int sSize, int fSize, int* typ, String server, String loc
         return 0;
     }
   }*/
-
+/*
 int SensorData::data2Json(String* fieldName)
 {
     
@@ -151,6 +167,39 @@ int SensorData::data2Json(String* fieldName)
         }
         
     }
-    serializeJson(dataJson, Serial);
+    serializeJsonPretty(dataJson, Serial);
     return 1;
+}*/
+int SensorData::data2Json(String* fieldName, char* output)
+{
+    for(int i=0;i<sSize;i++)
+    {  
+        JsonArray levels2 = levels.createNestedArray(fieldName[i]);
+        while(!(data[i])->isEmpty())
+        {
+            levels2.add((data[i])->front());
+            Serial.println("in sensorData");
+            Serial.println((data[i])->front());
+            (data[i])->pop_front();
+        }
+        
+    }
+    serializeJson(dataJson, output, sizeof(output));
+    return 1;
+}
+
+DynamicJsonDocument SensorData::data2Json(String* fieldName)
+{
+    for(int i=0;i<sSize;i++)
+    {  
+        JsonArray levels2 = levels.createNestedArray(fieldName[i]);
+        while(!(data[i])->isEmpty())
+        {
+            levels2.add((data[i])->front());
+            Serial.println("in sensorData");
+            Serial.println((data[i])->front());
+            (data[i])->pop_front();
+        }
+    }
+    return dataJson;
 }
