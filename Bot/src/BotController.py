@@ -32,7 +32,7 @@ class BotController:
 
         self.bot = discord_bot
         self.vc_handler = VisualCrossingHandler()
-    
+
 
     async def on_ready(self) -> None:
         """Method called when the bot is ready to work
@@ -83,3 +83,12 @@ class BotController:
             await interaction.response.send_message(f"La localisation {location_name} ne semble pas exister dans les données de Visual Crossing")
         else:
             await interaction.response.send_message(f"La localisation {location_name} a été ajoutée avec succès!")
+
+
+    async def delete_city(self, interaction : discord.Interaction, location_name : str) -> None:
+        """"""
+
+        if location_name not in self.vc_handler.get_city_list():
+            await interaction.response.send_message(f"La localisation {location_name} n'existe pas dans mes données :/")
+        else:
+            await interaction.response.send_message(f"La localisation {location_name} a bien été supprimée !")

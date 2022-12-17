@@ -39,6 +39,15 @@ class VisualCrossingHandler(threading.Thread):
         self.citiesData = {"Toulouse" : [], "Alger" : []}
 
 
+    def get_city_list(self) -> list:
+        """Returns a list containing all the cities for which the bot requests the
+        weather to the API
+        ## Return value:
+        A list of city names"""
+
+        return self.citiesData.keys()
+
+
     def _performRequest(self, request : str) -> dict:
         """Perform request contained in string specified in argument and return the
         result provided by the weather API. This is a private method.
