@@ -19,7 +19,7 @@ import VisualCrossingHandler as vc_handler
 from weatherImager import create_current_weather_image
 
 
-FREQ_MINUTES = 1
+FREQ_MINUTES = 10
 
 #===============================#
 #       Class Declaration       #
