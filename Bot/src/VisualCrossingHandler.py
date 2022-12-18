@@ -46,7 +46,7 @@ def currentWeatherRequest(locationName : str) -> dict:
     dict is empty"""
 
     current_weather_dict = {}
-    keys_list = ["temp", "feelslike", "humidity", "precip", "precipprob", "precip", "windgust", "windspeed", "winddir", "pressure", "visibility", "cloudcover", "uvindex", "conditions", "stations"]
+    keys_list = ["temp", "feelslike", "humidity", "precip", "precipprob", "preciptype", "precip", "windgust", "windspeed", "winddir", "pressure", "visibility", "cloudcover", "uvindex", "conditions", "stations"]
     logging.info(f"Performing a current weather request for {locationName}")
     request = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{locationName}/today?unitGroup=metric&include=current&key=S49E5MA43T843ZK2N6A4ZTT87&contentType=json&lang=id"
     response = _performRequest(request)
