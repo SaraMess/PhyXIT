@@ -79,6 +79,12 @@ async def get_weather(interaction : discord.Interaction, nom_localite : str):
   await controller.send_weather(interaction, nom_localite)
 
 
+@phyxit.tree.command(name="stop", description="Stoppe l'envoi de la météo pour la ville indiquée", guild=discord.Object(id=1049605745995415574))
+@app_commands.describe(nom_localite="Nom de la ville")
+async def stop_weather(interaction : discord.Interaction, nom_localite : str):
+  await controller.stop_weather(interaction, nom_localite)
+
+
 #####################################################################################################
 #ALWAYS RUN PART - DO NOT PUT ANYTHING BELOW - ALWAYS RUN PART - DO NOT PUT ANYTHING BELOW 
 #####################################################################################################

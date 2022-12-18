@@ -19,7 +19,7 @@ import VisualCrossingHandler as vc_handler
 from weatherImager import create_current_weather_image
 
 
-FREQ_MINUTES = 10
+FREQ_MINUTES = 1
 
 #===============================#
 #       Class Declaration       #
@@ -161,6 +161,28 @@ class BotController:
             await self._lock_msg_ref.acquire()
             self.weather_last_msg_ref[location_name] = (id_msg, interacion.channel)
             self._lock_msg_ref.release()
+
+
+    async def stop_weather(self, interaction : discord.Interaction, location_name : str) -> None:
+        """"""
+
+        await self._lock_msg_ref.acquire()
+        last_msg_id = self.weather_last_msg_ref.get(location_name, (-2, None))[0]
+        self._lock_msg_ref.release()
+        #If specified location is unknown for the bot:
+        if last_msg_id == -2:
+            logging.info(f"stop_weather command: {location_name} is unknown")
+            await interaction.response.send_message(f"Hmmm... La localité {location_name} n'est pas dans mes données!")
+        #If weather command was not called for the specified location:
+        elif last_msg_id == -1:
+            logging.info(f"weather for location {location_name} is not currently sent by the bot. Nothing to do")
+            await interaction.response.send_message(f"Je n'envoie actuellement pas la météo pour la localité {location_name}")
+        #Else, stop sending weather data for the specified location:
+        else:
+            await self._lock_msg_ref.acquire()
+            self.weather_last_msg_ref[location_name] = (-1, None)
+            self._lock_msg_ref.release()
+            await interaction.response.send_message(f"Bien compris, je n'enverrai plus la météo pour la localité {location_name}")
 
 
     async def _get_weather(self) -> None:
