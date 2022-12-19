@@ -207,7 +207,8 @@ class BotController:
                     self.cities_data[location_name].append(current_data)
                 #Else remove the first sample, to keep 6 hours of data:
                 else:
-                    self.cities_data[location_name] = self.cities_data[location_name][1:].append(current_data)
+                    self.cities_data[location_name] = self.cities_data[location_name][1:]
+                    self.cities_data[location_name].append(current_data)
                 await self._lock_msg_ref.acquire()
                 last_msg_id = self.weather_last_msg_ref[location_name][0]
                 channel : discord.TextChannel = self.weather_last_msg_ref[location_name][1]
@@ -215,25 +216,24 @@ class BotController:
                 #If command "meteo" was called by the user for the current city and not stopped:
                 if last_msg_id != -1:
                     create_current_weather_image(current_data, f"./data/{location_name}_current_weather.png")
-                    msg_to_del = await channel.fetch_message(last_msg_id)
                     #Try to delete previous webhook message:
                     try:
+                        msg_to_del = await channel.fetch_message(last_msg_id)
                         await msg_to_del.delete()
                     except discord.NotFound:
                         logging.warning(f"Message {last_msg_id} was already deleted. Nothing to do.")
                     except discord.HTTPException:
-                        logging.error("Message in response to weather command was not sent")
+                        logging.error("Message in response to weather command was not deleted")
+                    #try to send new webhook message:
+                    try:
+                        await channel.send(content=f"Voici la météo actuelle à {location_name}", file=discord.File(f"./data/{location_name}_current_weather.png"))
+                        #self.default_webhook.send(content=f"Voici la météo actuelle à {city_name}", file=discord.File(f"./data/{city_name}_current_weather.png"))
+                    except discord.NotFound:
+                        logging.error("Webhook used to send weather data was not found.")
+                    except discord.HTTPException:
+                        logging.error("Webhook was not sent")
                     else:
-                        #try to send new webhook message:
-                        try:
-                            await channel.send(content=f"Voici la météo actuelle à {location_name}", file=discord.File(f"./data/{location_name}_current_weather.png"))
-                            #self.default_webhook.send(content=f"Voici la météo actuelle à {city_name}", file=discord.File(f"./data/{city_name}_current_weather.png"))
-                        except discord.NotFound:
-                            logging.error("Webhook used to send weather data was not found.")
-                        except discord.HTTPException:
-                            logging.error("Webhook was not sent")
-                        else:
-                            await self._lock_msg_ref.acquire()
-                            self.weather_last_msg_ref[location_name] = (channel.last_message_id, channel)
-                            self._lock_msg_ref.release()
+                        await self._lock_msg_ref.acquire()
+                        self.weather_last_msg_ref[location_name] = (channel.last_message_id, channel)
+                        self._lock_msg_ref.release()
             self._lock_cities_data.release()
