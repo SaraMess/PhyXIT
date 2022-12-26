@@ -9,17 +9,11 @@
 #       Modules used in this file        #
 #========================================#
 
-import os
 import discord
 from discord.ext import commands
 from discord import app_commands
-import threading
-import json
-import requests
-import numpy as np
-import time
-from PIL import Image
 import logging
+import os
 
 from BotController import BotController
 
@@ -89,4 +83,4 @@ async def stop_weather(interaction : discord.Interaction, nom_localite : str):
 #ALWAYS RUN PART - DO NOT PUT ANYTHING BELOW - ALWAYS RUN PART - DO NOT PUT ANYTHING BELOW 
 #####################################################################################################
 
-phyxit.run("MTA0OTYxMTk0OTUyMjAyNjUxNg.GAjQUa.w4UbRBs1zb7uGlPUkFU0XLp0FxxjL1icaSSvxQ")
+phyxit.run(os.environ["PHYXIT_BOT_TOKEN"])

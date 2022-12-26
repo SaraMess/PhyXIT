@@ -10,9 +10,8 @@
 #========================================#
 
 import logging
+import os
 import requests
-import threading
-import time
 
 
 
@@ -48,7 +47,7 @@ def currentWeatherRequest(locationName : str) -> dict:
     current_weather_dict = {}
     keys_list = ["temp", "feelslike", "humidity", "precip", "precipprob", "preciptype", "precip", "windgust", "windspeed", "winddir", "pressure", "visibility", "cloudcover", "uvindex", "conditions", "stations"]
     logging.info(f"Performing a current weather request for {locationName}")
-    request = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{locationName}/today?unitGroup=metric&include=current&key=S49E5MA43T843ZK2N6A4ZTT87&contentType=json&lang=id"
+    request = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{locationName}/today?unitGroup=metric&include=current&key={os.environ['VC_TOKEN']}&contentType=json&lang=id"
     response = _performRequest(request)
     #If no response was received, return empty dict:
     if response == {}:
