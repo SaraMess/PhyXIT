@@ -99,22 +99,27 @@ class BotController:
         if len(self.cities_data) == 6:
             self._lock_cities_data.release()
             logging.error("Limit for number of cities has been reached")
-            await interaction.response.send_message("Le nombre de ville maximum autorisé (6) a été atteint")
+            await interaction.response.send_message("Le nombre maximal de villes autorisé (6) a été atteint, supprimez une ville \
+            puis réessayez!")
             return
         #Test if the specified location exists on VisualCrossing by performing a request
         #for this location:
-        if self.vc_handler.currentWeatherRequest(location_name) == {}:
+        current_data = vc_handler.currentWeatherRequest(location_name)
+        if current_data == {}:
             self._lock_cities_data.release()
             logging.error(f"An error occured while performing a request for {location_name}. \
             It seems that this city is not known by Visual Crossing API")
             await interaction.response.send_message(f"La localisation {location_name} ne semble pas exister dans les données de Visual Crossing")
-            return
-        self.cities_data[location_name] = []
-        self._lock_cities_data.release()
-        await self._lock_msg_ref.acquire()
-        self.weather_last_msg_ref[location_name] = (-1, None)
-        self._lock_msg_ref.release()
-        await interaction.response.send_message(f"La localisation {location_name} a été ajoutée avec succès!")
+        else:
+            #Create data list for the current location and add the first acquired data:
+            self.cities_data[location_name] = []
+            self.cities_data[location_name].append(current_data)
+            self._lock_cities_data.release()
+            await self._lock_msg_ref.acquire()
+            self.weather_last_msg_ref[location_name] = (-1, None)
+            self._lock_msg_ref.release()
+            create_current_weather_image(current_data, f"./data/{location_name}_current_weather.png")
+            await interaction.response.send_message(f"La localisation {location_name} a été ajoutée avec succès!")
 
 
     async def delete_city(self, interaction : discord.Interaction, location_name : str) -> None:
