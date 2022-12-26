@@ -14,6 +14,7 @@ from discord.ext import commands
 from discord import app_commands
 import logging
 import os
+import typing
 
 from BotController import BotController
 
@@ -45,9 +46,25 @@ async def on_message(message):
   await controller.on_message(message)
 
 
+
 #====================
 #    BOT'S COMMANDS
 #====================
+
+async def available_cities_autocomplete(interaction : discord.Interaction, current : str) -> typing.List[app_commands.Choice[str]]:
+  choices_list = []
+  for city_choice in controller.get_city_list():
+    if current.lower() in city_choice.lower():
+      choices_list.append(app_commands.Choice(name=city_choice, value=city_choice))
+  return choices_list
+
+
+async def enabled_cities_autocomplete(interaction : discord.Interaction, current : str) -> typing.List[app_commands.Choice[str]]:
+  choices_list = []
+  for city_choice in controller.get_enabled_cities_list():
+    if current.lower() in city_choice.lower():
+      choices_list.append(app_commands.Choice(name=city_choice, value=city_choice))
+  return choices_list
 
 
 @phyxit.tree.command(name="ping", description="Si je suis réveillé, je réponds pong! Sinon... et bien c'est que je dors 😴", guild=discord.Object(id=1049605745995415574))
@@ -63,20 +80,24 @@ async def ajouterVille(interaction : discord.Interaction, nom_localite : str):
 
 @phyxit.tree.command(name="suppr_ville", description="Supprime une ville de la liste des villes ajoutées", guild=discord.Object(id=1049605745995415574))
 @app_commands.describe(nom_localite="Nom de la ville à supprimer")
-async def delCity(interaction : discord.Interaction, nom_localite : str):
+@app_commands.autocomplete(nom_localite=available_cities_autocomplete)
+async def delete_city(interaction : discord.Interaction, nom_localite : str):
   await controller.delete_city(interaction, nom_localite)
 
 
 @phyxit.tree.command(name="meteo", description="Donne la météo pour la ville indiquée", guild=discord.Object(id=1049605745995415574))
 @app_commands.describe(nom_localite="Nom de la ville")
+@app_commands.autocomplete(nom_localite=available_cities_autocomplete)
 async def get_weather(interaction : discord.Interaction, nom_localite : str):
   await controller.send_weather(interaction, nom_localite)
 
 
 @phyxit.tree.command(name="stop", description="Stoppe l'envoi de la météo pour la ville indiquée", guild=discord.Object(id=1049605745995415574))
 @app_commands.describe(nom_localite="Nom de la ville")
+@app_commands.autocomplete(nom_localite=enabled_cities_autocomplete)
 async def stop_weather(interaction : discord.Interaction, nom_localite : str):
   await controller.stop_weather(interaction, nom_localite)
+
 
 
 #####################################################################################################

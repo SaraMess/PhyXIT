@@ -59,9 +59,24 @@ class BotController:
         """Returns a list containing all the cities for which the bot requests the
         weather to the API
         ## Return value:
-        A list of city names"""
+        A list of cities represented by their name
+        """
     
         return self.cities_data.keys()
+    
+    
+    def get_enabled_cities_list(self) -> list:
+        """Returns a list with the location for which the bot currently send the
+        weather on discord.
+        ## Return value :
+        A list of cities represented by their name
+        """
+        
+        location_list = []
+        for location_name in self.weather_last_msg_ref.keys():
+            if self.weather_last_msg_ref[location_name][0] != -1:
+                location_list.append(location_name)
+        return location_name
 
 
     async def on_message(self, message) -> None:
