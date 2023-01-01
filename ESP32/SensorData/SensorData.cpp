@@ -100,7 +100,7 @@ SensorData::SensorData(int sSize, int fSize, int* typ, String server, String loc
     if (sizeD>= sSize) {
         for(int i=0;i<sSize; i++)
             {   
-                (data[i])->push_back(D[i]);
+                (data[i])->push_back(static_cast<int>(D[i]*1000));
             }
             return 1;
     } 

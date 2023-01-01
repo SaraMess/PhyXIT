@@ -35,7 +35,7 @@ const char* password = "cpldfpga49912";
 //const char* password = "uuie1303";
 
 DHT dht_sensor(DHT_PIN, DHT_TYPE); // humidity sensor
-SensorData test(3, 100);
+SensorData* test;
 float distance_cm;
 int pass;
 
@@ -48,17 +48,18 @@ void setup() {
   pinMode(RANGE_ECHO_PIN, INPUT);
 
   pinMode(PRESENCE_PIN, INPUT);// set the presence detector
-
-  float data[] = {1.1, 2.2, 3.3};
-  test.dataSave(data, sizeof(data) / sizeof(data[0]));
   pass = -1;
 
+  test = new SensorData(3,100,"Home", "ESP32");
   // network settup
   set_wifi(); // init wifi
   client.setServer(mqtt_server, 1883); // setting the server IP and Port
   client.setCallback(callback); // setting the MQTT callback function
   Serial.println("Finished Setup");
-
+  while (!client.connected()) {
+    reconnect();
+    Serial.println("Connecting to MQTT broker");
+  }
 }
 
 
@@ -156,25 +157,18 @@ n1 = n1 +1;
 
   // wait a 2 seconds between readings
   String here[] = {"temp", "humi", "rang"};
-  float dataa[] = {n1, n2, n3};
-  test.dataSave(dataa, 3);
+  float dataa[] = {tempC, humi, rang};
+  test->dataSave(dataa, 3);
     // sending to MQTT broker
-  if (!client.connected()) {
-    reconnect();
-    Serial.println("Connecting to MQTT broker");
-  }
-
-  //client.loop();
-  //test.data2Json(here, output);
-  Serial.println("output value");
+  Serial.println("Saved values.");
   //Serial.println(output);
   //String str(output);
   //Serial.println(str);
-  if (pass == 10)
+  if (pass == 4)
   {
-    DynamicJsonDocument jsonD = test.data2Json(here);
+    DynamicJsonDocument jsonD = test->data2Json(here);
     String out("test");
-    //serializeJson(test.data2Json(here), out);
+    //serializeJson(test->data2Json(here), out);
     serializeJson(jsonD, out);
     Serial.println("passing here");
     //char* output = new char(200);
@@ -184,13 +178,18 @@ n1 = n1 +1;
     strcpy(char_array, out.c_str());
     Serial.println(char_array);
     //out.toCharArray(output, 200);
+    while (!client.connected()) {
+    reconnect();
+    Serial.println("Connecting to MQTT broker");
+  }
     client.publish("esp32/temperature",char_array);
     Serial.println(n);
     pass = -1;
+    delete test;
+    test = new SensorData(3,100,"home", "esp32");
   }
   else
     pass++;
   Serial.println("");
   delay(100);
-
 }
