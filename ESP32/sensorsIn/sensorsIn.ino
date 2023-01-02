@@ -20,6 +20,7 @@
 #define RANGE_ECHO_PIN 27
 
 const char* mqtt_server = "51.178.50.237"; // mqtt config //
+String types[] = {"f","f","f"};
 long lastMsg = 0;
 char msg[50];
 int value = 0;
@@ -50,7 +51,7 @@ void setup() {
   pinMode(PRESENCE_PIN, INPUT);// set the presence detector
   pass = -1;
 
-  test = new SensorData(3,100,"Home", "ESP32");
+  test = new SensorData(3,100,types,"Home", "ESP32");
   // network settup
   set_wifi(); // init wifi
   client.setServer(mqtt_server, 1883); // setting the server IP and Port
@@ -171,12 +172,10 @@ n1 = n1 +1;
     //serializeJson(test->data2Json(here), out);
     serializeJson(jsonD, out);
     Serial.println("passing here");
-    //char* output = new char(200);
     Serial.println(out);
     int n = out.length();
     char char_array[n + 1];
     strcpy(char_array, out.c_str());
-    Serial.println(char_array);
     //out.toCharArray(output, 200);
     while (!client.connected()) {
     reconnect();
@@ -184,9 +183,9 @@ n1 = n1 +1;
   }
     client.publish("esp32/temperature",char_array);
     Serial.println(n);
-    pass = -1;
+    pass = 0;
     delete test;
-    test = new SensorData(3,100,"home", "esp32");
+    test = new SensorData(3,100,types,"home", "esp32");
   }
   else
     pass++;

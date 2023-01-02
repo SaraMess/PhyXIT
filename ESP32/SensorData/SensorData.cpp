@@ -1,71 +1,45 @@
 #include"SensorData.h"
 
 
-SensorData::SensorData(int sSize, int fSize):sSize(sSize), fSize(fSize), dataJson(10000) {
-    data = new Fifo<float>*[sSize];
-    types = new int[sSize];
-    for(int i=0;i<sSize; i++)
-    {
-        data[i] = new Fifo<float>(fSize);
-        types[i] = 0;
-    }
-    dataJson = dataJson.to<JsonObject>();
-    dataJson["Server"] = "ESP32";
-    dataJson["Localisation"] = "Home";
-    levels = dataJson.createNestedObject("Sensors");
-    } 
-SensorData::SensorData(SensorData &other):dataJson(1000) {
+
+SensorData::SensorData(SensorData &other):dataJson(10000) {
     sSize = other.sSize;
     fSize = other.fSize;
-    data = new Fifo<float>*[sSize];
-    types = new int[sSize];
-    for(int i=0;i<sSize; i++)
-    {
-        data[i] = new Fifo<float>(fSize);
-        types[i] = 0;
-    }
+    data = new Fifo<int>*[sSize];
+    types = new String[sSize];
     dataJson = dataJson.to<JsonObject>();
     dataJson["Server"] = "ESP32";
     dataJson["Localisation"] = "Home";
+    String allTypes = "";
+    for(int i=0;i<sSize; i++)
+    {
+        data[i] = new Fifo<int>(fSize);
+        types[i] = other.types[i];
+        allTypes = allTypes+"-"+types[i];
+        
+    }
+    dataJson["dTypes"] = allTypes;
     levels = dataJson.createNestedObject("Sensors");
     } 
 
-SensorData::SensorData(int sSize, int fSize, String server, String localisation):sSize(sSize), fSize(fSize),dataJson(10000) {
-    data = new Fifo<float>*[sSize];
-    types = new int[sSize];
+SensorData::SensorData(int sSize, int fSize, String* dtypes, String server, String localisation):sSize(sSize), fSize(fSize),dataJson(10000) {
+    data = new Fifo<int>*[sSize];
+    types = new String[sSize];
+    dataJson = dataJson.to<JsonObject>();
+    dataJson["Server"] = "ESP32";
+    dataJson["Localisation"] = "Home";
+    String allTypes = "";
     for(int i=0;i<sSize; i++)
     {
-        data[i] = new Fifo<float>(fSize);
-        types[i] = 0;
+        data[i] = new Fifo<int>(fSize);
+        types[i] = dtypes[i];
+        allTypes = allTypes+"-"+dtypes[i];
+        
     }
-    dataJson = dataJson.to<JsonObject>();
-    dataJson["Server"] = server;
-    dataJson["Localisation"] = localisation;
+    dataJson["dTypes"] = allTypes;
     levels = dataJson.createNestedObject("Sensors");
     } 
 
-SensorData::SensorData(int sSize, int fSize, int* typ):sSize(sSize), fSize(fSize),dataJson(10000) {
-    data = new Fifo<float>*[sSize];
-    types = new int[sSize];
-    for(int i=0;i<sSize; i++)
-    {
-        data[i] = new Fifo<float>(fSize);
-        types[i] = typ[i];
-    }
-    } 
-SensorData::SensorData(int sSize, int fSize, int* typ, String server, String localisation):sSize(sSize), fSize(fSize),dataJson(10000) {
-    data = new Fifo<float>*[sSize];
-    types = new int[sSize];
-    for(int i=0;i<sSize; i++)
-    {
-        data[i] = new Fifo<float>(fSize);
-        types[i] = typ[i];
-    }
-    dataJson = dataJson.to<JsonObject>();
-    dataJson["Server"] = server;
-    dataJson["Localisation"] = localisation;
-    levels = dataJson.createNestedObject("Sensors");
-    } 
 /*SensorData::SensorData(int sSize, int fSize, int* types):sSize(sSize), fSize(fSize) {
     data = new Fifo<float>*[sSize];
     for(int i=0;i<sSize; i++)
@@ -203,3 +177,14 @@ DynamicJsonDocument SensorData::data2Json(String* fieldName)
     }
     return dataJson;
 }
+/*
+int SensorData::sendDataMQTT(PubSubClient client)
+{
+    String out("");
+    serializeJson(dataJson, out);
+    int n = out.length();
+    char char_array[n + 1];
+    strcpy(char_array, out.c_str());
+    client.publish("esp32/temperature",char_array);
+    return 1;
+}*/

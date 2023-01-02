@@ -12,6 +12,7 @@
 #include <stdlib.h>     
 #include "ArduinoJson.h"
 #include "Arduino.h"
+#include "PubSubClient.h"
 #include <string>
 #include <iostream>
 
@@ -158,28 +159,24 @@
 class SensorData{
     int sSize;
     int fSize;
-    Fifo<float>** data; // all the sensors
-    int* types;
+    Fifo<int>** data; // all the sensors
+    String* types;
     DynamicJsonDocument dataJson; // check if viable
     JsonObject levels; // sensors group
     JsonArray* levels2;
     
     public:
-    SensorData(int, int, int*);
     SensorData(SensorData &);
-    SensorData(int, int, int*, String, String);
-    SensorData(int sSize, int fSize);
-    SensorData(int, int, String, String);
-    SensorData(int);
-    SensorData();
+    SensorData(int, int, String*,String, String);
     ~SensorData();
     int dataSetSize(int fSize);
     void dataSend(void);
     int dataSave(float*, int);
-    int dataSave(float*, int, int*);
     //int data2Json(String*);
     DynamicJsonDocument data2Json(String*);
     int data2Json(String*, char* output);
+    //int sendDataMQTT(PubSubClient client);
+
 };
 
 
