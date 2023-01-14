@@ -99,6 +99,11 @@ async def stop_weather(interaction : discord.Interaction, nom_localite : str):
   await controller.stop_weather(interaction, nom_localite)
 
 
+@phyxit.tree.command(name="info", description="Indique les villes connues par le bot", guild=discord.Object(id=1049605745995415574))
+async def get_cities_status(interaction : discord.Interaction):
+  await controller.get_cities_status(interaction)
+
+
 
 #####################################################################################################
 #ALWAYS RUN PART - DO NOT PUT ANYTHING BELOW - ALWAYS RUN PART - DO NOT PUT ANYTHING BELOW 

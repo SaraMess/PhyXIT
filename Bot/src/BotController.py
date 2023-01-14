@@ -205,6 +205,32 @@ class BotController:
             await interaction.response.send_message(f"Bien compris, je n'enverrai plus la météo pour la localité {location_name}")
 
 
+    async def get_cities_status(self, interaction : discord.Interaction) -> None :
+        """Build and send an embed message with status data about added cities.
+        This embed indicates for which known cities the user currently get the
+        weather.
+        ## Parameters:
+        * `ìnteraction`: reference to the interaction that generated the call to the command
+        ## Return value:
+        Not applicable
+        """
+
+        await self._lock_msg_ref.acquire()
+        embed_status = discord.Embed(title="Voici les villes connues par PhyXIT", description= f"Nombre de villes ajoutées {len(self.weather_last_msg_ref)}/6", color=0x87CEEB)
+        #Get status for all added cities:
+        print(self.weather_last_msg_ref)
+        for city_name in self.weather_last_msg_ref.keys():
+            if self.weather_last_msg_ref[city_name][0] == -1:
+                embed_status.add_field(name=city_name, value="météo actuellement non transmise", inline=False)
+            else:
+                embed_status.add_field(name=city_name, value="transmission de la météo activée", inline=False)
+        self._lock_msg_ref.release()
+        try:
+            await interaction.response.send_message(content="", embed=embed_status)
+        except discord.HTTPException as e:
+            logging.error(f"Status embed was not sent. Reason : {e.text}")
+
+
     async def _get_weather(self) -> None:
         """This async task method corresponds to the management of the weather requests 
         for the cities specified by the user. This task also transmits the 
