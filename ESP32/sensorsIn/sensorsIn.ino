@@ -15,18 +15,15 @@
 
 #define DHT_PIN  32 // ESP32 pin GIOP21 connected to DHT22 sensor
 #define DHT_TYPE DHT22
-#define PRESENCE_PIN 33
+#define PRESENCE_PIN 14
 #define RANGE_TRIG_PIN 26
 #define RANGE_ECHO_PIN 27
 
 const char* mqtt_server = "51.178.50.237"; // mqtt config //
 String types[] = {"f","f","f"};
-long lastMsg = 0;
-char msg[50];
+long deltaT = 0;
+long lastT = 0;
 int value = 0;
-int n1 =0;
-int n2 = 0;
-int n3 =0;
 WiFiClient espClient; // wifi config
 PubSubClient client(espClient);
 //
@@ -38,21 +35,19 @@ const char* password = "cpldfpga49912";
 DHT dht_sensor(DHT_PIN, DHT_TYPE); // humidity sensor
 SensorData* test;
 float distance_cm;
-int pass;
+int pinStateCurrent = LOW;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("In setup");
   dht_sensor.begin(); // initialize the DHT sensor
 
   pinMode(RANGE_TRIG_PIN, OUTPUT);// set the Range sensor
   pinMode(RANGE_ECHO_PIN, INPUT);
 
   pinMode(PRESENCE_PIN, INPUT);// set the presence detector
-  pass = -1;
-
+  
   test = new SensorData(3,100,types,"Home", "ESP32");
-  // network settup
+  // network setup
   set_wifi(); // init wifi
   client.setServer(mqtt_server, 1883); // setting the server IP and Port
   client.setCallback(callback); // setting the MQTT callback function
@@ -73,7 +68,8 @@ void set_wifi() {
   Serial.println(ssid);
 
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) 
+  {
     delay(500);
     Serial.print(".");
   }
@@ -82,8 +78,8 @@ void set_wifi() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
 }
+
 //
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
@@ -133,27 +129,26 @@ void reconnect() {
   }
 }
 void loop() {
-n1 = n1 +1;
-  n2 = n3= n1;
   // read range
+  deltaT = millis()- lastT;
   digitalWrite(RANGE_TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(RANGE_TRIG_PIN, LOW);
   float duration_us = pulseIn(RANGE_ECHO_PIN, HIGH);
   // calculate the distance
   float rang = 0.017 * duration_us;
-  Serial.print("distance: ");
-  Serial.println(rang);
+  //Serial.print("distance: ");
+  //Serial.println(rang);
 
   // read humidity
   float humi  = dht_sensor.readHumidity();
   // read temperature in Celsius
-  Serial.print("humidity: ");
-  Serial.println(humi);
+  //Serial.print("humidity: ");
+  //Serial.println(humi);
   float tempC = dht_sensor.readTemperature();
   // read temperature in Fahrenheit
   float tempF = dht_sensor.readTemperature(true);
-  Serial.print("temperature: ");
+  //Serial.print("temperature: ");
   Serial.println(tempC);
 
   // wait a 2 seconds between readings
@@ -161,14 +156,10 @@ n1 = n1 +1;
   float dataa[] = {tempC, humi, rang};
   test->dataSave(dataa, 3);
     // sending to MQTT broker
-  Serial.println("Saved values.");
-  //Serial.println(output);
-  //String str(output);
-  //Serial.println(str);
-  if (pass == 4)
+  if (deltaT >= 600000)
   {
     DynamicJsonDocument jsonD = test->data2Json(here);
-    String out("test");
+    String out("");
     //serializeJson(test->data2Json(here), out);
     serializeJson(jsonD, out);
     Serial.println("passing here");
@@ -177,18 +168,24 @@ n1 = n1 +1;
     char char_array[n + 1];
     strcpy(char_array, out.c_str());
     //out.toCharArray(output, 200);
-    while (!client.connected()) {
-    reconnect();
-    Serial.println("Connecting to MQTT broker");
-  }
-    client.publish("esp32/temperature",char_array);
-    Serial.println(n);
-    pass = 0;
+    while (!client.connected()) 
+    {
+      reconnect();
+      Serial.println("Connecting to MQTT broker");
+    }
+    client.publish("esp32/sensors",char_array);
+    deltaT = 0;
     delete test;
-    test = new SensorData(3,100,types,"home", "esp32");
+    test = new SensorData(3,100,types,"home", "esp32"); // size of fifo 100 number of sensors 3
+    lastT = millis();
   }
-  else
-    pass++;
-  Serial.println("");
+  int pinStatePrevious = pinStateCurrent; // store old state
+  pinStateCurrent = digitalRead(PRESENCE_PIN);
+  Serial.println(pinStateCurrent);
+  if(pinStateCurrent == HIGH) //pinStatePrevious == LOW &&  
+  {   
+      char char_array[1];
+      client.publish("esp32/presence",char_array);
+  }
   delay(100);
 }
