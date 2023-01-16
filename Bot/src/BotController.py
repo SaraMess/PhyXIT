@@ -143,8 +143,12 @@ class BotController:
         if location_name not in self.get_city_list():
             await interaction.response.send_message(f"La localisation {location_name} n'existe pas dans mes données :/")
         else:
+            await self._lock_cities_data.acquire()
             del self.cities_data[location_name]
+            self._lock_cities_data.release()
+            await self._lock_msg_ref()
             del self.weather_last_msg_ref[location_name]
+            self._lock_msg_ref.release()
             await interaction.response.send_message(f"La localisation {location_name} a bien été supprimée !")
 
     
