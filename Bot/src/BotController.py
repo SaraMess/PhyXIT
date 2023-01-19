@@ -10,13 +10,17 @@
 #========================================#
 
 import asyncio
+import asyncio
 import discord
 from discord.ext import commands
 import logging
+import numpy as np
 import time
 
+import graphic
 import VisualCrossingHandler as vc_handler
 from weatherImager import create_current_weather_image
+import paho.mqtt.client as mqtt
 
 
 FREQ_MINUTES = 10
@@ -41,6 +45,9 @@ class BotController:
         self._lock_cities_data = asyncio.Lock()
         self._lock_msg_ref = asyncio.Lock()
 
+        self.mqtt_message = ""
+        self.mqtt_data = {"temp" : [], "humi" : [], "rang" : []}
+
 
     async def on_ready(self) -> None:
         """Method called when the bot is ready to work
@@ -50,9 +57,10 @@ class BotController:
         logging.info("Synchronize bot command tree to discord")
         await self.bot.tree.sync(guild=discord.Object(id=1049605745995415574))
         logging.info("Starting acquiring weather data from Visual Crossing API")
-        loop = asyncio.get_event_loop()
-        loop.create_task(self._get_weather())
+        #loop = asyncio.get_event_loop()
+        #loop.create_task(self._get_weather())
         logging.info("Bot is ready to use!")
+
 
 
     def get_city_list(self) -> list:
@@ -64,7 +72,13 @@ class BotController:
     
         return self.cities_data.keys()
     
+
+    def get_available_data_type(self) -> list:
+        """"""
+
+        return list(self.mqtt_data.keys())
     
+
     def get_enabled_cities_list(self) -> list:
         """Returns a list with the location for which the bot currently send the
         weather on discord.
@@ -135,6 +149,20 @@ class BotController:
             self._lock_msg_ref.release()
             create_current_weather_image(current_data, f"./data/{location_name}_current_weather.png")
             await interaction.response.send_message(f"La localisation {location_name} a été ajoutée avec succès!")
+
+
+    async def get_esp32_data(self, interaction : discord.Interaction, data_type : str) -> None:
+        #If specified data type is "all":
+        if data_type == "all":
+            graphic.generate_all_graph(self.mqtt_data)
+            await interaction.response.send_message("Voici l'ensemble des statistiques en provenance de l'esp32", file=discord.File(f"{graphic.GRAPHIC_SAVE_PATH}all_graph.png"))
+        #If specified data is known:
+        elif data_type in self.mqtt_data.keys():
+            graphic.generate_unique_graph(self.mqtt_data[data_type], data_type)
+            await interaction.response.send_message(f"Voici le graphe correspondant pour {data_type}", file=discord.File(f"{graphic.GRAPHIC_SAVE_PATH}{data_type}_graph.png"))
+
+        else:
+            await interaction.response.send_message("Je ne reconnais pas le type de données indiqué !")
 
 
     async def delete_city(self, interaction : discord.Interaction, location_name : str) -> None:
