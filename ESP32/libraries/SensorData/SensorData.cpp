@@ -1,7 +1,15 @@
+/**
+ * @file SensorData.cpp
+ * @author Sara Messara (sara.messara@univ-tlse3.fr)
+ * @brief Data container for stroing heterigeneous data types with Json serialisation support
+ * @version 1.3
+ * @date 2023-01-21
+ * @copyright Copyright (c) 2023 - BSD licence
+ * 
+ */
+
+
 #include"SensorData.h"
-
-
-
 SensorData::SensorData(SensorData &other):dataJson(10000) {
     sSize = other.sSize;
     fSize = other.fSize;
@@ -27,7 +35,7 @@ SensorData::SensorData(int sSize, int fSize, String* dtypes, String server, Stri
     types = new String[sSize];
     dataJson = dataJson.to<JsonObject>();
     dataJson["Server"] = "ESP32";
-    dataJson["Localisation"] = "Home";
+    dataJson["Localisation"] = "xxx";
     String allTypes = "";
     for(int i=0;i<sSize; i++)
     {

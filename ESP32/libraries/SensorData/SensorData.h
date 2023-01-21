@@ -1,3 +1,13 @@
+/**
+ * @file SensorData.h
+ * @author Sara Messara (sara.messara@univ-tlse3.fr)
+ * @brief Data container for stroing heterigeneous data types with Json serialisation support
+ * @version 1.3
+ * @date 2023-01-21
+ * @copyright Copyright (c) 2023 - BSD licence
+ * 
+ */
+
 #ifndef __SensorData__
 #define __SensorData__
 
@@ -155,7 +165,10 @@
         T& operator=(T& value) = delete;
     };
 
-
+/**
+ * @brief Data container class
+ * 
+ */
 class SensorData{
     int sSize;
     int fSize;
