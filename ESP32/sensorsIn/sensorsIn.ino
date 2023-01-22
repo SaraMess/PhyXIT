@@ -1,9 +1,8 @@
 /*
-   This ESP32 code is created by esp32io.com
-
-   This ESP32 code is released in the public domain
-
-   For more detail (instruction and wiring diagram), visit https://esp32io.com/tutorials/esp32-temperature-humidity-sensor
+   Authors : Sara Messara - Clement Pages
+   Licence : BSD
+   Stamped : 12:13 21.01.2023
+   Part of the project PhyXIT
 */
 
 
@@ -13,29 +12,30 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-#define DHT_PIN  32 // ESP32 pin GIOP21 connected to DHT22 sensor
-#define DHT_TYPE DHT22
-#define PRESENCE_PIN 14
-#define RANGE_TRIG_PIN 26
+#define DHT_PIN  32 // DHT22 sensor settings - humidity and temperature
+#define DHT_TYPE DHT22 
+#define PRESENCE_PIN 14 // MF-6402129 setting - presence 
+#define RANGE_TRIG_PIN 26 // HC-SR settings - range 
 #define RANGE_ECHO_PIN 27
 
-const char* mqtt_server = "51.178.50.237"; // mqtt config //
-String types[] = {"f","f","f"};
+const char* mqtt_server = "51.178.50.237"; // UPSSITECH mqtt broker
+String types[] = {"f","f","f"}; // Specify sensors data type f-> floats i-> int b-> bool
 long deltaT = 0;
 long lastT = 0;
 int value = 0;
 WiFiClient espClient; // wifi config
 PubSubClient client(espClient);
-//
+
 const char* ssid = "Sarsour";
-const char* password = "cpldfpga49912";
-//const char* ssid = "LarbiP";
-//const char* password = "uuie1303";
+const char* password = "cpldfpga49912"; // these are confidential clear data 
 
 DHT dht_sensor(DHT_PIN, DHT_TYPE); // humidity sensor
-SensorData* test;
+SensorData* data_container;
 float distance_cm;
 int pinStateCurrent = LOW;
+
+int numS = 3; // number of ensors
+int sizeF = 10; // size of FIFO stack
 
 void setup() {
   Serial.begin(9600);
@@ -46,7 +46,7 @@ void setup() {
 
   pinMode(PRESENCE_PIN, INPUT);// set the presence detector
   
-  test = new SensorData(3,100,types,"Home", "ESP32");
+  data_container = new SensorData(numS,sizeF,types,"Home", "ESP32"); 
   // network setup
   set_wifi(); // init wifi
   client.setServer(mqtt_server, 1883); // setting the server IP and Port
@@ -82,29 +82,17 @@ void set_wifi() {
 
 //
 void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
   String messageTemp;
-
   for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
     messageTemp += (char)message[i];
   }
-  Serial.println();
-
-  //  // Feel free to add more if statements to control more GPIOs with MQTT
-  //
   //  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off".
   //  // Changes the output state according to the message
   if (String(topic) == "esp32/output") {
-    Serial.print("Changing output to ");
     if (messageTemp == "on") {
-      Serial.println("on");
       //      digitalWrite(ledPin, HIGH);
     }
     else if (messageTemp == "off") {
-      Serial.println("off");
       //      digitalWrite(ledPin, LOW);
     }
   }
@@ -128,42 +116,33 @@ void reconnect() {
     }
   }
 }
+
 void loop() {
   // read range
-  deltaT = millis()- lastT;
+  deltaT = millis()- lastT; // duration since last MQTT data sending
   digitalWrite(RANGE_TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(RANGE_TRIG_PIN, LOW);
   float duration_us = pulseIn(RANGE_ECHO_PIN, HIGH);
   // calculate the distance
   float rang = 0.017 * duration_us;
-  //Serial.print("distance: ");
-  //Serial.println(rang);
-
   // read humidity
   float humi  = dht_sensor.readHumidity();
-  // read temperature in Celsius
-  //Serial.print("humidity: ");
-  //Serial.println(humi);
   float tempC = dht_sensor.readTemperature();
   // read temperature in Fahrenheit
   float tempF = dht_sensor.readTemperature(true);
-  //Serial.print("temperature: ");
-  Serial.println(tempC);
 
-  // wait a 2 seconds between readings
-  String here[] = {"temp", "humi", "rang"};
+  String here[] = {"Temperature", "Humidity", "Range"}; 
   float dataa[] = {tempC, humi, rang};
-  test->dataSave(dataa, 3);
+  data_container->dataSave(dataa, 3);
+  
     // sending to MQTT broker
-  if (deltaT >= 600000)
+  if (deltaT >= 6000) // 600000
   {
-    DynamicJsonDocument jsonD = test->data2Json(here);
+    DynamicJsonDocument jsonD = data_container->data2Json(here);
     String out("");
-    //serializeJson(test->data2Json(here), out);
+    //serializeJson(data_container->data2Json(here), out);
     serializeJson(jsonD, out);
-    Serial.println("passing here");
-    Serial.println(out);
     int n = out.length();
     char char_array[n + 1];
     strcpy(char_array, out.c_str());
@@ -173,10 +152,10 @@ void loop() {
       reconnect();
       Serial.println("Connecting to MQTT broker");
     }
-    client.publish("esp32/sensors",char_array);
+    client.publish("esp32/sensors",char_array); // publishing on mqtt topic
     deltaT = 0;
-    delete test;
-    test = new SensorData(3,100,types,"home", "esp32"); // size of fifo 100 number of sensors 3
+    delete data_container;
+    data_container = new SensorData(3,10,types,"Home", "Esp32"); // size of fifo 100 number of sensors 3
     lastT = millis();
   }
   int pinStatePrevious = pinStateCurrent; // store old state
