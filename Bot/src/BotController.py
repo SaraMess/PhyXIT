@@ -57,8 +57,8 @@ class BotController:
         logging.info("Synchronize bot command tree to discord")
         await self.bot.tree.sync(guild=discord.Object(id=1049605745995415574))
         logging.info("Starting acquiring weather data from Visual Crossing API")
-        #loop = asyncio.get_event_loop()
-        #loop.create_task(self._get_weather())
+        loop = asyncio.get_event_loop()
+        loop.create_task(self._get_weather())
         logging.info("Bot is ready to use!")
 
 
@@ -128,8 +128,7 @@ class BotController:
         if len(self.cities_data) == 6:
             self._lock_cities_data.release()
             logging.error("Limit for number of cities has been reached")
-            await interaction.response.send_message("Le nombre maximal de villes autorisé (6) a été atteint, supprimez une ville \
-            puis réessayez!")
+            await interaction.response.send_message("Le nombre maximal de villes autorisé (6) a été atteint, supprimez une ville puis réessayez!")
             return
         #Test if the specified location exists on VisualCrossing by performing a request
         #for this location:
