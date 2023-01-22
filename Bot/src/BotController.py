@@ -132,12 +132,15 @@ class BotController:
             logging.error("Limit for number of cities has been reached")
             await interaction.response.send_message("Le nombre maximal de villes autorisé (6) a été atteint, supprimez une ville puis réessayez!")
             return
+        #If location is already known by the bot, do nothing:
+        if location_name in await self.get_city_list():
+            await interaction.response.send_message(f"La localisation {location_name} a déjà été ajoutée. Vous pouvez utiliser la commande /meteo.")
+            return
         #Test if the specified location exists on VisualCrossing by performing a request
         #for this location:
         current_data = vc_handler.currentWeatherRequest(location_name)
         if current_data == {}:
-            logging.error(f"An error occured while performing a request for {location_name}. \
-            It seems that this city is not known by Visual Crossing API")
+            logging.error(f"An error occured while performing a request for {location_name}. It seems that this city is not known by Visual Crossing API")
             await interaction.response.send_message(f"La localisation {location_name} ne semble pas exister dans les données de Visual Crossing")
         else:
             #Create data list for the current location and add the first acquired data:
