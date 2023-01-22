@@ -55,7 +55,7 @@ async def on_message(message):
 
 async def available_cities_autocomplete(interaction : discord.Interaction, current : str) -> typing.List[app_commands.Choice[str]]:
   choices_list = []
-  for city_choice in controller.get_city_list():
+  for city_choice in await controller.get_city_list():
     if current.lower() in city_choice.lower():
       choices_list.append(app_commands.Choice(name=city_choice, value=city_choice))
   return choices_list
@@ -63,7 +63,7 @@ async def available_cities_autocomplete(interaction : discord.Interaction, curre
 
 async def enabled_cities_autocomplete(interaction : discord.Interaction, current : str) -> typing.List[app_commands.Choice[str]]:
   choices_list = []
-  for city_choice in controller.get_enabled_cities_list():
+  for city_choice in await controller.get_enabled_cities_list():
     if current.lower() in city_choice.lower():
       choices_list.append(app_commands.Choice(name=city_choice, value=city_choice))
   return choices_list
