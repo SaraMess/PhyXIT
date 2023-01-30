@@ -1,5 +1,5 @@
 # PhyXIT
-Physically eXtended Intereactive Technologies
+Physically eXtended Interactive Technologies
 (PhyXIT) is a hardware and software solution that allows the integration of both physical and virtual sensors, centralize the data on an online server and provide display by a graphical interface on Discord using a Discord Bot.  
 
 The hardware application integrates 4 physical sensors (temperature, humidity, range and presence) wired to an ESP32 board. The communication to the online server was achieved using the MQTT protocol. Data was converted to Json objects before being published on the UPSSITECH broker @51.178.50.237 under the topic name "esp32/sensors".  
