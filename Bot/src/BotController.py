@@ -47,7 +47,7 @@ class BotController:
         self._lock_msg_ref = asyncio.Lock()
 
         self.mqtt_message = ""
-        self.mqtt_data = {"temp" : [], "humi" : [], "rang" : []}
+        self.mqtt_data = {"Temperature" : [], "Humidity" : [], "Range" : []}
 
 
     async def on_ready(self) -> None:
