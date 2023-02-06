@@ -1,3 +1,14 @@
+/**
+ * @file SensorData.cpp
+ * @author Sara Messara sara.messara@univ-tlse3.fr
+ * @brief Licence BSD
+ * @version 1.2
+ * @date 2023-02-06
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include"SensorData.h"
 
 

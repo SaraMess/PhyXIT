@@ -1,3 +1,14 @@
+/**
+ * @file SensorData.h
+ * @author Sara Messara
+ * @brief Licence BSD
+ * @version 1.2
+ * @date 2023-02-06
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #ifndef __SensorData__
 #define __SensorData__
 

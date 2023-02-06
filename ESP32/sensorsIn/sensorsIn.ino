@@ -1,10 +1,9 @@
 /*
-   This ESP32 code is created by esp32io.com
-
-   This ESP32 code is released in the public domain
-
-   For more detail (instruction and wiring diagram), visit https://esp32io.com/tutorials/esp32-temperature-humidity-sensor
-*/
+ * Author : Sara Messara - Clément Pagès 
+ * Timestamp : 02.06.2023
+ * Licence : BSD
+ * 
+ */
 
 
 #include <DHT.h>
@@ -46,7 +45,7 @@ void setup() {
 
   pinMode(PRESENCE_PIN, INPUT);// set the presence detector
   
-  test = new SensorData(3,100,types,"Home", "ESP32");
+  test = new SensorData(3,5,types,"Home", "ESP32");
   // network setup
   set_wifi(); // init wifi
   client.setServer(mqtt_server, 1883); // setting the server IP and Port
@@ -152,12 +151,14 @@ void loop() {
   Serial.println(tempC);
 
   // wait a 2 seconds between readings
-  String here[] = {"temp", "humi", "rang"};
+  String here[] = {"Temperature", "Humidity", "Range"};
   float dataa[] = {tempC, humi, rang};
   test->dataSave(dataa, 3);
     // sending to MQTT broker
-  if (deltaT >= 600000)
+  if (deltaT >= 1000)
   {
+    Serial.println("ccompute time");
+    Serial.println(deltaT);
     DynamicJsonDocument jsonD = test->data2Json(here);
     String out("");
     //serializeJson(test->data2Json(here), out);
@@ -176,7 +177,7 @@ void loop() {
     client.publish("esp32/sensors",char_array);
     deltaT = 0;
     delete test;
-    test = new SensorData(3,100,types,"home", "esp32"); // size of fifo 100 number of sensors 3
+    test = new SensorData(3,5,types,"home", "esp32"); // size of fifo 100 number of sensors 3
     lastT = millis();
   }
   int pinStatePrevious = pinStateCurrent; // store old state
