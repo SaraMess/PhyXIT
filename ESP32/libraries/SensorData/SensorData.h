@@ -166,7 +166,10 @@
         T& operator=(T& value) = delete;
     };
 
-
+/**
+ * @brief Data container class
+ * 
+ */
 class SensorData{
     int sSize;
     int fSize;

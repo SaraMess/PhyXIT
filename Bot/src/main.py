@@ -55,7 +55,7 @@ async def on_message(message):
 
 async def available_cities_autocomplete(interaction : discord.Interaction, current : str) -> typing.List[app_commands.Choice[str]]:
   choices_list = []
-  for city_choice in controller.get_city_list():
+  for city_choice in await controller.get_city_list():
     if current.lower() in city_choice.lower():
       choices_list.append(app_commands.Choice(name=city_choice, value=city_choice))
   return choices_list
@@ -63,7 +63,7 @@ async def available_cities_autocomplete(interaction : discord.Interaction, curre
 
 async def enabled_cities_autocomplete(interaction : discord.Interaction, current : str) -> typing.List[app_commands.Choice[str]]:
   choices_list = []
-  for city_choice in controller.get_enabled_cities_list():
+  for city_choice in await controller.get_enabled_cities_list():
     if current.lower() in city_choice.lower():
       choices_list.append(app_commands.Choice(name=city_choice, value=city_choice))
   return choices_list
@@ -86,7 +86,7 @@ async def ping(interaction : discord.Interaction):
 @phyxit.tree.command(name="ajoute_ville", description="Ajoute une ville pour laquelle vous souhaitez obtenir la météo, dans la limite de 6 villes", guild=discord.Object(id=1049605745995415574))
 @app_commands.describe(nom_localite="Nom de la ville à ajouter")
 async def ajouterVille(interaction : discord.Interaction, nom_localite : str):
-  await controller.add_city(interaction, nom_localite)
+  await controller.add_city(interaction, nom_localite.capitalize())
 
 
 @phyxit.tree.command(name="suppr_ville", description="Supprime une ville de la liste des villes ajoutées", guild=discord.Object(id=1049605745995415574))
